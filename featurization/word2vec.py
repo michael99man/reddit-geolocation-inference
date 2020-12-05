@@ -25,11 +25,9 @@ class EpochSaver(CallbackAny2Vec):
         self.epoch += 1
 
 
-
 def main():
     rows = mysql.fetch_all_cleaned(limit=None)
     print("Fetched %d rows" % len(rows))
-
 
     documents = extract_documents(rows)
     word2vec(documents)
@@ -46,10 +44,12 @@ def word2vec(documents):
                          window=3,
                          # number of parameters
                          size=300,
-                         sample=6e-5,
+                         # downsample frequent words
+                         sample=5e-5,
                          negative=20,
                          workers=cores - 1,
-                         callbacks=[saver])
+                         callbacks=[saver]
+                     )
 
     t = time.time()
     model.build_vocab(documents, progress_per=10000)
@@ -65,24 +65,16 @@ def word2vec(documents):
 
 # extracts documents from rows, converting the stringified list into a list
 def extract_documents(rows):
-    a_time = 0
-    b_time = 0
     print("Extracing documents...")
     documents = []
     for i in range(len(rows)):
         # convert list string into list
-        t0 = time.time()
         d = rows[i]['document'].replace("\'", "\"")
-        t1 = time.time()
         tokens = json.loads(d)
-        t2 = time.time()
 
-        a_time += (t1-t0)
-        b_time += (t2-t1)
         documents.append(tokens)
         if (i % 10000 == 0):
             print("%d/%d: %d tokens" % (i, len(rows), len(tokens)))
-            print("A: %f| B: %f" % (a_time, b_time))
     return documents
 
 # compute dictionary of all words
