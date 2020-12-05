@@ -1,4 +1,4 @@
-from featurization import mysql
+import featurization.mysql as mysql
 from collections import defaultdict
 import json
 import time
