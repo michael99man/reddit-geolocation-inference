@@ -10,7 +10,7 @@ from gensim.models.callbacks import CallbackAny2Vec
 from gensim.test.utils import get_tmpfile
 logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
 
-gcores = multiprocessing.cpu_count()
+cores = multiprocessing.cpu_count()
 print("I have %d cores" % cores)
 
 class EpochSaver(CallbackAny2Vec):
@@ -27,16 +27,32 @@ class EpochSaver(CallbackAny2Vec):
         self.epoch += 1
 
 
+class SentenceIterator:
+    def __init__(self, rows):
+        self.rows = rows
+
+    def __iter__(self):
+        for i in range(len(self.rows)):
+            c = self.rows[i]['document']
+
+            if(isinstance(c, str)):
+                # convert this document into a list of tokens
+                tokens = json.loads(c.replace("\'", "\""))
+                self.rows[i]['document'] = tokens
+
+            yield self.rows[i]['document']
+
+
 def main():
     rows = mysql.fetch_all_cleaned(limit=None)
     print("Fetched %d rows" % len(rows))
+    # documents = extract_documents(rows)
+    word2vec(rows)
 
-    documents = extract_documents(rows)
-    word2vec(documents)
 
-
-def word2vec(documents):
+def word2vec(rows):
     saver = EpochSaver("word2vec_model")
+    sentences = SentenceIterator(rows)
 
     model = Word2Vec(min_count=100,
                          # skip gram
@@ -53,13 +69,13 @@ def word2vec(documents):
                      )
 
     t = time.time()
-    model.build_vocab(documents, progress_per=10000)
+    model.build_vocab(sentences, progress_per=10000)
 
     print('Time to build vocab: {} mins'.format(round((time.time() - t) / 60, 2)))
     model.save("vocab.model")
 
     t = time.time()
-    model.train(documents, total_examples=model.corpus_count, epochs=30, report_delay=1)
+    model.train(sentences, total_examples=model.corpus_count, epochs=30, report_delay=1)
     print('Time to train the model: {} mins'.format(round((time.time() - t) / 60, 2)))
     model.save("full.model")
 
