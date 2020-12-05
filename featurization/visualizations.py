@@ -1,6 +1,7 @@
 
 import matplotlib.pyplot as plt
 import helpers
+import pickle
 
 def plot_location_pie_chart(users):
     states = {"Foreign": 0}
@@ -27,7 +28,6 @@ def plot_location_pie_chart(users):
     plt.show()
 
 def plot_user_source(users):
-
     sources = {'r/politics Flairs':0, 'State-based subreddits':0}
 
     for user in users:
@@ -46,4 +46,26 @@ def plot_user_source(users):
     fig1.set_size_inches(10, 10)
     circle = plt.Circle(xy=(0, 0), radius=0.75, facecolor='white')
     plt.gca().add_artist(circle)
+    plt.show()
+
+
+
+# plots a histogram of how many activity entries
+def plot_user_activity_counts():
+    rows = pickle.load(open("data/unique_users.p", "rb"))
+    print(rows)
+    print(len(rows))
+
+    count = 0
+    for row in rows:
+        if row[1] >=500:
+            count += 1
+    print(count)
+
+    vals = list(map(lambda row: row[1], rows))
+    n_bins = 20
+
+    fig, ax = plt.subplots(1,1)
+    ax.hist(vals, n_bins, range=(0, 3000))
+    ax.set_title("Histogram")
     plt.show()

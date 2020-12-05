@@ -1,4 +1,6 @@
 data/
 venv/
 __pycache__
-      
+data.nosync/
+.idea
+.DS_STORE 
