@@ -10,6 +10,8 @@ from gensim.models.callbacks import CallbackAny2Vec
 from gensim.test.utils import get_tmpfile
 logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
 
+gcores = multiprocessing.cpu_count()
+print("I have %d cores" % cores)
 
 class EpochSaver(CallbackAny2Vec):
     '''Callback to save model after each epoch.'''
@@ -34,9 +36,8 @@ def main():
 
 
 def word2vec(documents):
-    saver = EpochSaver("my_w2v")
+    saver = EpochSaver("word2vec_model")
 
-    cores = multiprocessing.cpu_count()
     model = Word2Vec(min_count=100,
                          # skip gram
                          sg=1,
