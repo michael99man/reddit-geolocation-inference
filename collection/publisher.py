@@ -4,8 +4,7 @@
 """ Pushes work to the RabbitMQ queue and coordinates the fetches, periodically printing rate information
 """
 import pika
-import database
-import helpers
+from collection import database, helpers
 
 
 def init():

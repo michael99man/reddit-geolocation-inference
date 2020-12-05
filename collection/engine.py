@@ -1,10 +1,6 @@
-from retriever import Retriever
-import pickler
-import helpers
-import sys
-import database
-import visualizations
-import time
+from collection import pickler, database
+from featurization import visualizations
+
 
 # fetch users from r/politics and state subreddits
 # OBSOLETE, REWRITE INTO WORKERS IF NEEDED

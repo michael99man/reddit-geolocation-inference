@@ -1,7 +1,13 @@
-
 import matplotlib.pyplot as plt
-import helpers
+from collection import helpers
 import pickle
+
+def plt_word_count():
+    dictionary = pickle.load(open('dict.p', 'rb'))
+    print(dictionary.values())
+    return
+    plt.hist(dictionary.values(), 100)
+    plt.show()
 
 def plot_location_pie_chart(users):
     states = {"Foreign": 0}

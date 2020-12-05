@@ -4,10 +4,9 @@
 """ Consumes activity entries from the RabbitMQ activity queue and writes to DB, printing out statistics as well
 """
 import pika
-import helpers
 import time
 import json
-import database
+from collection import database, helpers
 
 count = 0
 

@@ -4,9 +4,9 @@
 """ Retrieves work from the RabbitMQ queue and performs the fetch operation, then passes the resulting rows to the output queue
 """
 import pika
-import helpers
+from collection import helpers
 import sys
-from retriever import Retriever
+from collection.retriever import Retriever
 import json
 
 def init():

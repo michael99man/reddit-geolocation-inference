@@ -5,11 +5,10 @@
 """
 
 import praw
-import helpers
 from praw.models import MoreComments
 from psaw import PushshiftAPI
-from helpers import states
-import pickler
+from collection.helpers import states
+from collection import pickler, helpers
 
 ids = ["pw9MViKdnvWhvg", "NS3agxMZ4b-jsg", "9LMNOYIf3-aHcg", "25ziqrlE-oLLaw", "Z9o5Pqo2wb3DOQ", "eimkyYu2Ilur0Q", "0Xr2T0wag5tpzg", "qyxztQqeBQS5sA", "roBbLMyO9IePSA", "RvUqLB0PyFPeTw", "_f_atr1DIqcnNw","Q1Oy8MK_h-3FYg", "qXHeySUMAL4zzw", "2JfJq5rziYDE0w","gerQxFBoNoECjA","VaU5LAmEjCXtnw","EbAxC0O6FlZZ6w","cKlKIpDcc6SWjQ","40aYBMCM1KxqQw", "y4b76WQNiDa6Lg"]
 secrets = ["N3DpHmI8cRJ1vUZQmCyjrj3_KSAcZg", "4A-2iK0DNfsRo0ZuYpMxtkAqRQ9rGQ", "zn84HS4knQZxJqQq0lAkSnvXCwT0vw", "K_FN3Hh8BDthyFtCjU6x1ITX9inXLQ", "jUEDw8bLgqAbu3eZcXaCamdnYvmFRQ", "vJZyiZ0KDWoM-uCvOLrlT6fUL4SBfg", "isOyyTg_Z0gWaVPb78FUcJKZlamvbg", "GUpfdN9DWjYp_0ri6soT_gU9fwGOKA", "CGh8Ue8MgHkwnw8YyeDEcmz2SZ3itQ", "gOvnjiUThZXK9GaZyfJofFEwaLo2bg", "nvH5jgeLxj2k10-LdIphUSrVzCvV4w","ErDsETn7CwOzmCaRShdz3PL9EkDwHA","tL661goKFwcy0_t6hqBj47pvJjJ0GQ","1J1ICzRp8Tqqu2wyZoX_dLfzXsQiPg","PZOwoIo183R0XuDVBXWwSTSDdKOYKQ","A3Q7tQ3aNXvj_bfL-epYKFVxL_schw","jqXe2JJ3QEw6yvsbLx1h-msl0XbPdg","kalud-IZs6mqFg6hbquc4yKW_zoISQ","7js4pFgg9qaWBMloMkATKzFGiGvyNw", "GGRJLEtCcsTgl0vBqSJH1OfwlvJJhg"]
