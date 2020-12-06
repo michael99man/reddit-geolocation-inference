@@ -79,21 +79,6 @@ def word2vec(rows):
     print('Time to train the model: {} mins'.format(round((time.time() - t) / 60, 2)))
     model.save("full.model")
 
-
-# extracts documents from rows, converting the stringified list into a list
-def extract_documents(rows):
-    print("Extracing documents...")
-    documents = []
-    for i in range(len(rows)):
-        # convert list string into list
-        d = rows[i]['document'].replace("\'", "\"")
-        tokens = json.loads(d)
-
-        documents.append(tokens)
-        if (i % 10000 == 0):
-            print("%d/%d: %d tokens" % (i, len(rows), len(tokens)))
-    return documents
-
 # compute dictionary of all words
 def compute_dict(documents):
     dictionary = defaultdict(int)

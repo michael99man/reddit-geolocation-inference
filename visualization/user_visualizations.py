@@ -1,3 +1,6 @@
+""" Provides visualizations relating to the user demographics
+"""
+
 import matplotlib.pyplot as plt
 from collection import helpers
 import pickle
@@ -21,8 +24,6 @@ def plot_location_pie_chart(users):
         else:
             print("Foreign %s" % location)
             states["Foreign"] +=1
-
-
 
     fig1, ax1 = plt.subplots()
     ax1.pie(states.values(), labels=states.keys(), autopct='%1.1f%%', shadow=False, startangle=90, textprops={'fontsize': 6})

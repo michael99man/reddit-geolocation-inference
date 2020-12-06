@@ -1,5 +1,5 @@
 from collection import pickler, database
-from featurization import visualizations
+from visualization import user_visualizations
 
 
 # fetch users from r/politics and state subreddits
@@ -23,8 +23,8 @@ def main():
 
 def plotting():
     users = database.get_all_users()
-    visualizations.plot_location_pie_chart(users)
-    visualizations.plot_user_source(users)
+    user_visualizations.plot_location_pie_chart(users)
+    user_visualizations.plot_user_source(users)
 
 
 if __name__ == "__main__":
