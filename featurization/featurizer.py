@@ -6,11 +6,13 @@ from collections import defaultdict
 import json
 import numpy as np
 from featurization import mysql
+import pickle
 
-
+discard_n = 300
+sub_n = 5000
 # takes in a subreddit_arr and converts it to the normalized indexed form
 # creates a sparse vector of subreddit activity
-def normalized_subreddit_vector(subreddit_arr):
+def normalized_subreddit_vector(subreddit_arr, sub_dict):
     v = np.zeros(sub_n)
 
     for subreddit in subreddit_arr:
@@ -44,11 +46,10 @@ def load_data():
 
     for r in cleaned_rows:
         username = r['username']
-        #print(r)
-        arr_str = r['subreddit_arr']
-        subreddit_arr = json.loads(arr_str.replace("\'", "\""))
+        subreddit_arr = tokenizer(r['subreddit_arr'])
         for s in subreddit_arr:
             subreddits[s] += 1
+        data[username]['document'] = r['document']
 
     print("Read %d unique subreddits" % len(subreddits))
 
@@ -58,8 +59,6 @@ def load_data():
 
 
     # remove 300 most popular subreddits and keep next top 5000 subreddits
-    discard_n = 300
-    sub_n = 5000
     sub_5k = sorted_subs[discard_n:discard_n+sub_n]
     sub_dict = dict([(sub_5k[i][0], i) for i in range(len(sub_5k))])
 
@@ -70,11 +69,16 @@ def load_data():
     for row in cleaned_rows:
         username = row['username']
         subreddits = tokenizer(row['subreddit_arr'])
-        sub_v = normalized_subreddit_vector(subreddits)
+        sub_v = normalized_subreddit_vector(subreddits, sub_dict)
         data[username]['subreddit_v'] = sub_v
         count +=1
 
         if(count % 10000 == 0):
             print("Processed %d entries" % count)
-
+    
+    # load time vectors
+    time_vectors = pickle.load(open("models/prob_vectors.time", 'rb'))
+    for username in time_vectors:
+        data[username]['time_v'] = time_vectors[username]
+    
     return data

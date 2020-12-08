@@ -17,7 +17,6 @@ def fetch_users():
         sql = "SELECT * FROM `users`"
         cursor.execute(sql)
         rows = cursor.fetchall()
-        print(rows)
         return rows
 
 def fetch_activity_for_user(username):
