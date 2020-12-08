@@ -17,7 +17,7 @@ print("Let's use", torch.cuda.device_count(), "GPUs!")
 
 
 ## Hyperparameters
-num_epochs = 10
+num_epochs = 20 
 num_classes = 10  # there are 10 digits: 0 to 9
 batch_size = 256
 text_length = torch.ones([int(batch_size/8)])
@@ -30,36 +30,63 @@ time_dim = 6
 
 device = torch.device("cuda:0") 
 
-def main():
+def load_embedding():
     # load word2vec weights
     EpochSaver = word2vec.EpochSaver
     w2v = KeyedVectors.load_word2vec_format('./models/word2vec.model')
 
     weights = torch.FloatTensor(w2v.vectors)
     embedding = nn.Embedding.from_pretrained(weights)
+    
+    return embedding
 
+def init_model():
+    embedding = load_embedding()
+
+    # instantiate the model
+    model = Classifier(embedding)
+    opt = optim.Adam(model.parameters())
+    
+    parallel_model = nn.DataParallel(model, device_ids=[0,1,2,3,4,5,6,7])
+    # move parallel model to device
+    parallel_model=parallel_model.to(device)
+
+    return train(parallel_model, opt, 0)
+
+def continue_training(epoch):
+    path = "epoch_" + str(epoch) +".model"
+    checkpoint = torch.load(path)
+    assert(checkpoint['epoch'] == epoch) 
+   
+    
+    embedding = load_embedding()
+    model = Classifier(embedding)
+    
+    parallel_model = nn.DataParallel(model, device_ids=[0,1,2,3,4,5,6,7])
+    # move parallel model to device
+    parallel_model=parallel_model.to(device)
+    parallel_model.load_state_dict(checkpoint['state_dict'])
+
+    opt = optim.Adam(model.parameters())
+    opt.load_state_dict(checkpoint['optimizer'])
+
+    return train(parallel_model, opt, epoch+1)
+
+
+def train(model, opt, epoch):
     # load saved feature tensors
     train_set = pickle.load(open("train_set.p", "rb"))
     
     # train_loader returns batches of training data. See how train_loader is used in the Trainer class later
     train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True,num_workers=30, drop_last = True)
     
-    # instantiate the model
-    model = Classifier(embedding)
-    learning_rate = 0.085
-
-    opt = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
+    #opt = optim.SGD(model.parameters(), lr=learning_rate, momentum=0.9)
     loss_function = nn.CrossEntropyLoss()
 
-    parallel_model = nn.DataParallel(model, device_ids=[0,1,2,3,4,5,6,7])
-    # move parallel model to device
-    parallel_model=parallel_model.to(device)
-
-    trainer = Trainer(net=parallel_model, optim=opt, loss_function=loss_function, train_loader=train_loader)
-    losses = trainer.train(num_epochs)
+    trainer = Trainer(net=model, optim=opt, loss_function=loss_function, train_loader=train_loader, epoch=epoch)
+    losses = trainer.train()
     
     torch.save(model.state_dict(), "final_model.pt")
-    torch.save(parallel_model.state_dict(), "parallel_model.pt")
     print("Saved models")
     
     return model
@@ -120,30 +147,31 @@ class Classifier(nn.Module):
 
 ### Drives training
 class Trainer():
-    def __init__(self,net=None,optim=None,loss_function=None, train_loader=None):
+    def __init__(self,net=None,optim=None,loss_function=None, train_loader=None, epoch=0):
         self.net = net
         self.optim = optim
         self.loss_function = loss_function
         self.train_loader = train_loader
+        self.epoch = epoch 
 
-    def train(self,epochs):
+    def train(self):
+        print("Beginning training at epoch %d" % self.epoch)
         losses = []
-        for epoch in range(epochs):
+        
+        while self.epoch < num_epochs:
+            start = time.time()
             epoch_loss = 0.0
             epoch_steps = 0
             for (words, subs, times, labels) in self.train_loader:
                 # ACT10-Zero the gradient in the optimizer, i.e. self.optim
                 self.optim.zero_grad()
-                # ACT11-Get the output of your CNN on input X. Note: this is a one-line, simple 
-                #   answer. Your PyTorch network can take a whole batch as input!
+                
+                # run the network on this input batch
                 output = self.net(words, subs, times, labels)
-                torch.cuda.device_of(output)
-                print(output.device)
+                
                 # move labels to output cuda
                 labels = labels.to(output.device)
-                # ACT12-Compute loss using loss function, i.e. self.loss_function
-                #   Note: If you're unsure of the usage of loss_function, look at PyTorch
-                #   documentation for nn.CrossEntropyLoss, which is the loss_function we use
+               
                 loss = self.loss_function(output, labels.long())
 
                 # ACT13-Backpropagate on the loss to compute gradients of parameters
@@ -155,7 +183,14 @@ class Trainer():
                 epoch_steps += 1
             # average loss of epoch
             losses.append(epoch_loss / epoch_steps)
-            print("epoch [%d]: loss %.3f" % (epoch+1, losses[-1]))
+            print("epoch [%d]: loss %.3f, took %f seconds" % (self.epoch, losses[-1], time.time() - start))
+            checkpoint = {
+                    'epoch': self.epoch,
+                    'state_dict': self.net.state_dict(),
+                    'optimizer': self.optim.state_dict()
+            }
+            torch.save(checkpoint, "epoch_" + str(self.epoch) + ".model") 
+            self.epoch +=1 
         return losses
 
 
@@ -167,7 +202,7 @@ def evaluate_model(model):
     err=0
     tot = 0
     with torch.no_grad():
-        for (words, subs, times, labels) in test_loader
+        for (words, subs, times, labels) in test_loader:
             output = model(words, subs, times, labels)
 
             # let the maximum index be our predicted class
@@ -183,6 +218,6 @@ def evaluate_model(model):
     print('Accuracy of FC prediction on test digits: %5.2f%%' % (100-100 * err / tot))
 
 if __name__ == "__main__":
-    model = main()
-    evaluate_model(model)
+    completed_model = continue_training(15)
+    evaluate_model(completed_model)
 
