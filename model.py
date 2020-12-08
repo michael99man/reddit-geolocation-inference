@@ -28,6 +28,8 @@ n_output_classes = 51
 sub_dim = 5000
 time_dim = 6
 
+device = torch.device("cuda:0") 
+
 def main():
     # load word2vec weights
     EpochSaver = word2vec.EpochSaver
@@ -38,11 +40,9 @@ def main():
 
     # load saved feature tensors
     train_set = pickle.load(open("train_set.p", "rb"))
-    test_set = pickle.load(open("test_set.p", "rb"))
     
     # train_loader returns batches of training data. See how train_loader is used in the Trainer class later
     train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True,num_workers=30, drop_last = True)
-    test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True,num_workers=30, drop_last=True)
     
     # instantiate the model
     model = Classifier(embedding)
@@ -52,7 +52,6 @@ def main():
     loss_function = nn.CrossEntropyLoss()
 
     parallel_model = nn.DataParallel(model, device_ids=[0,1,2,3,4,5,6,7])
-    device = torch.device("cuda:0") 
     # move parallel model to device
     parallel_model=parallel_model.to(device)
 
@@ -61,6 +60,9 @@ def main():
     
     torch.save(model.state_dict(), "final_model.pt")
     torch.save(parallel_model.state_dict(), "parallel_model.pt")
+    print("Saved models")
+    
+    return model
 
 class ChungusSet(Dataset):
     def __init__(self, words, subs, times, labels):
@@ -157,6 +159,30 @@ class Trainer():
         return losses
 
 
+
+def evaluate_model(model):
+    test_set = pickle.load(open("test_set.p", "rb"))
+    test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True,num_workers=30, drop_last=True)
+
+    err=0
+    tot = 0
+    with torch.no_grad():
+        for (words, subs, times, labels) in test_loader
+            output = model(words, subs, times, labels)
+
+            # let the maximum index be our predicted class
+            _, yh = torch.max(output, 1)
+
+            tot += y.size(0)
+
+            ## add to err number of missclassification, i.e. number of indices that
+            ## yh and y are not equal
+            ## note that y and yh are vectors of size = batch_size = (256 in our case)
+            err += sum(list(map(lambda i: 1 if labels[i] != yh[i] else 0, range(len(labels)))))
+
+    print('Accuracy of FC prediction on test digits: %5.2f%%' % (100-100 * err / tot))
+
 if __name__ == "__main__":
-    main()
+    model = main()
+    evaluate_model(model)
 
