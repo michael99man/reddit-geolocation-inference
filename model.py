@@ -15,10 +15,8 @@ from torch.utils.data import Dataset
 # CUDA refers to the GPU
 print("Let's use", torch.cuda.device_count(), "GPUs!")
 
-
 ## Hyperparameters
-num_epochs = 20 
-num_classes = 10  # there are 10 digits: 0 to 9
+num_epochs = 100 
 batch_size = 256
 text_length = torch.ones([int(batch_size/8)])
 print(text_length)
@@ -208,7 +206,7 @@ def evaluate_model(model):
             # let the maximum index be our predicted class
             _, yh = torch.max(output, 1)
 
-            tot += y.size(0)
+            tot += labels.size(0)
 
             ## add to err number of missclassification, i.e. number of indices that
             ## yh and y are not equal
@@ -218,6 +216,6 @@ def evaluate_model(model):
     print('Accuracy of FC prediction on test digits: %5.2f%%' % (100-100 * err / tot))
 
 if __name__ == "__main__":
-    completed_model = continue_training(15)
+    completed_model = continue_training(42)
     evaluate_model(completed_model)
 

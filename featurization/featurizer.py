@@ -52,7 +52,13 @@ def load_data():
         data[username]['document'] = r['document']
 
     print("Read %d unique subreddits" % len(subreddits))
-
+    
+    # delete state subreddits from input subs
+    state_subs = ["alaska", "Alabama", "Arkansas", "arizona", "California", "Colorado", "Connecticut", "washingtondc", "Delaware", "florida", "Georgia", "Hawaii", "Iowa", "Idaho", "illinois", "Indiana", "kansas", "Kentucky", "Louisiana", "massachusetts", "maryland", "Maine", "Michigan", "minnesota", "missouri", "mississippi", "Montana", "NorthCarolina", "northdakota", "Nebraska", "newhampshire", "newjersey", "NewMexico", "Nevada", "newyork", "Ohio", "oklahoma", "oregon", "Pennsylvania", "RhodeIsland", "southcarolina", "SouthDakota", "Tennessee", "texas", "Utah", "Virginia", "vermont", "Washington", "wisconsin", "WestVirginia", "wyoming"]
+    for sub in state_subs:
+        if sub in subreddits:
+            del subreddits[sub]
+    
     # sort most popular subreddits
     sorted_subs = sorted(subreddits.items(), key=lambda v: v[1])
     sorted_subs.reverse()
@@ -63,7 +69,8 @@ def load_data():
     sub_dict = dict([(sub_5k[i][0], i) for i in range(len(sub_5k))])
 
     print("Kept a dict of the top %d->%d subreddits" % (discard_n, sub_n))
-
+    pickle.dump(sub_dict, open("sub_dict.p", "wb"))
+    
     # create subreddit vectors for each user
     count = 0
     for row in cleaned_rows:
