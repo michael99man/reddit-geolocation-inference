@@ -1,4 +1,4 @@
-import featurization.mysql as mysql
+import mysql
 from collections import defaultdict
 import json
 import time
@@ -9,9 +9,6 @@ import logging  # Setting up the loggings to monitor gensim
 from gensim.models.callbacks import CallbackAny2Vec
 from gensim.test.utils import get_tmpfile
 logging.basicConfig(format="%(levelname)s - %(asctime)s: %(message)s", datefmt= '%H:%M:%S', level=logging.INFO)
-
-cores = multiprocessing.cpu_count()
-print("I have %d cores" % cores)
 
 class EpochSaver(CallbackAny2Vec):
     '''Callback to save model after each epoch.'''
@@ -44,6 +41,8 @@ class SentenceIterator:
 
 
 def main():
+    cores = multiprocessing.cpu_count()
+    print("I have %d cores" % cores)
     rows = mysql.fetch_all_cleaned(limit=None)
     print("Fetched %d rows" % len(rows))
     # documents = extract_documents(rows)
