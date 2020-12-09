@@ -4,7 +4,7 @@ import pymysql
 from collections import defaultdict
 import json
 import numpy as np
-import mysql
+from featurization import mysql
 import pickle
 from gensim.models import KeyedVectors
 from torch.utils.data import Dataset

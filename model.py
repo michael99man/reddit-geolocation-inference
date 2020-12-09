@@ -11,6 +11,7 @@ from torch.utils.data import DataLoader
 import geopy
 import torch.optim as optim
 from torch.utils.data import Dataset
+from featurization import featurizer
 # Set the device to use
 # CUDA refers to the GPU
 print("Let's use", torch.cuda.device_count(), "GPUs!")
@@ -25,6 +26,9 @@ lstm_out_dim = 256
 n_output_classes = 51
 sub_dim = 5000
 time_dim = 6
+
+import sys
+sys.path.insert(0,'/home/ec2-user/ele574/ele574-project/featurization')
 
 device = torch.device("cuda:0") 
 
@@ -199,6 +203,6 @@ def evaluate_model(model):
     print('Accuracy of FC prediction on test digits: %5.2f%%' % (100-100 * err / tot))
 
 if __name__ == "__main__":
-    completed_model = init_model()
+    completed_model = continue_training(26)
     evaluate_model(completed_model)
 

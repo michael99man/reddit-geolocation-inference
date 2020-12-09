@@ -1,4 +1,4 @@
-import mysql
+from featurization import mysql
 from collections import defaultdict
 import json
 import time
