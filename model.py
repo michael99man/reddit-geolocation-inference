@@ -73,7 +73,7 @@ def continue_training(epoch):
 
 def train(model, opt, epoch):
     # load saved feature tensors
-    train_set = pickle.load(open("train_set.p", "rb"))
+    train_set = pickle.load(open("data/train_set.p", "rb"))
     
     # train_loader returns batches of training data. See how train_loader is used in the Trainer class later
     train_loader = DataLoader(dataset=train_set, batch_size=batch_size, shuffle=True,num_workers=30, drop_last = True)
@@ -89,23 +89,6 @@ def train(model, opt, epoch):
     
     return model
 
-class ChungusSet(Dataset):
-    def __init__(self, words, subs, times, labels):
-        self.words = words
-        self.subs = subs
-        self.times = times
-        self.labels = labels
-        assert(len(words)== len(subs) and len(subs) == len(times) and len(times) == len(labels))
-    
-    def __len__(self):
-        return len(self.words)
-
-    def __getitem__(self, idx):
-        #get images and labels here 
-        #returned images must be tensor
-        #labels should be int 
-        return self.words[idx], self.subs[idx] , self.times[idx], self.labels[idx] 
-        
 class Classifier(nn.Module):
     def __init__(self, embedding):
         super(Classifier, self).__init__()
@@ -194,7 +177,7 @@ class Trainer():
 
 
 def evaluate_model(model):
-    test_set = pickle.load(open("test_set.p", "rb"))
+    test_set = pickle.load(open("data/test_set.p", "rb"))
     test_loader = DataLoader(dataset=test_set, batch_size=batch_size, shuffle=True,num_workers=30, drop_last=True)
 
     err=0
@@ -216,6 +199,6 @@ def evaluate_model(model):
     print('Accuracy of FC prediction on test digits: %5.2f%%' % (100-100 * err / tot))
 
 if __name__ == "__main__":
-    completed_model = continue_training(42)
+    completed_model = init_model()
     evaluate_model(completed_model)
 
