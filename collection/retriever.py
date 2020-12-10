@@ -19,7 +19,6 @@ class Retriever:
         self.reddit = praw.Reddit(
             client_id=ids[instance],
             client_secret=secrets[instance],
-            password="correct horse battery staple",
             user_agent="script:net.michaelman:v0.1 (by u/ele574-scraper)",
             username= usernames[instance],
         )
