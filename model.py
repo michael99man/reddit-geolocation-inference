@@ -203,6 +203,6 @@ def evaluate_model(model):
     print('Accuracy of FC prediction on test digits: %5.2f%%' % (100-100 * err / tot))
 
 if __name__ == "__main__":
-    completed_model = continue_training(26)
+    completed_model = continue_training(62)
     evaluate_model(completed_model)
 
